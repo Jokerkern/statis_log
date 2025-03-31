@@ -17,7 +17,7 @@ pip install statis_log
 或者从源码安装：
 
 ```bash
-git clone https://github.com/yourusername/statis_log.git
+git clone https://github.com/jokerkern/statis_log.git
 cd statis_log
 pip install -e .
 ```
