@@ -60,3 +60,4 @@ Thumbs.db
 logs/
 *.log
 coverage_report/
+.mypy_cache/
