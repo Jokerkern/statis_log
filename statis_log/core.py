@@ -8,6 +8,7 @@ import os
 import time
 import logging
 import importlib
+import pkgutil
 from typing import Any, Dict, List, Optional, Type, TypeVar, Generic
 
 from statis_log.collectors.base import BaseCollector
@@ -86,17 +87,8 @@ class StatisLog:
     
     def _load_plugins(self) -> None:
         """加载内置和自定义插件"""
-        # 注册内置收集器
-        from statis_log.collectors.file_collector import FileCollector
-        collector_registry.register("file", FileCollector)
-        
-        # 注册内置分析器
-        from statis_log.analyzers.pattern_analyzer import PatternAnalyzer
-        analyzer_registry.register("pattern", PatternAnalyzer)
-        
-        # 注册内置通知器
-        from statis_log.notifiers.email_notifier import EmailNotifier
-        notifier_registry.register("email", EmailNotifier)
+        # 加载内置插件模块
+        self._load_builtin_plugins()
         
         # 加载自定义插件
         custom_plugins = self.config.get("plugins", [])
@@ -106,6 +98,72 @@ class StatisLog:
                 logger.info(f"加载自定义插件: {plugin_path}")
             except ImportError as e:
                 logger.error(f"加载自定义插件失败: {plugin_path} - {e}")
+        
+        # 自动发现插件 (从配置中的插件目录)
+        plugin_dirs = self.config.get("plugin_dirs", [])
+        for plugin_dir in plugin_dirs:
+            self._discover_plugins_in_dir(plugin_dir)
+    
+    def _load_builtin_plugins(self) -> None:
+        """加载内置插件"""
+        # 自动发现并加载内置收集器
+        self._discover_module_plugins("statis_log.collectors")
+        
+        # 自动发现并加载内置分析器
+        self._discover_module_plugins("statis_log.analyzers")
+        
+        # 自动发现并加载内置通知器
+        self._discover_module_plugins("statis_log.notifiers")
+    
+    def _discover_module_plugins(self, package_name: str) -> None:
+        """
+        自动发现并加载指定包中的所有插件模块
+        
+        Args:
+            package_name: 包名
+        """
+        try:
+            package = importlib.import_module(package_name)
+            package_path = getattr(package, '__path__', None)
+            
+            if package_path:
+                # 获取包中的所有模块
+                for _, name, is_pkg in pkgutil.iter_modules(package_path):
+                    # 跳过__init__和base模块
+                    if name != "__init__" and name != "base":
+                        module_name = f"{package_name}.{name}"
+                        try:
+                            importlib.import_module(module_name)
+                            logger.debug(f"加载内置插件模块: {module_name}")
+                        except ImportError as e:
+                            logger.error(f"加载内置插件模块失败: {module_name} - {e}")
+        except ImportError as e:
+            logger.error(f"加载插件包失败: {package_name} - {e}")
+    
+    def _discover_plugins_in_dir(self, plugin_dir: str) -> None:
+        """发现并加载指定目录中的插件"""
+        if not os.path.exists(plugin_dir) or not os.path.isdir(plugin_dir):
+            logger.warning(f"插件目录不存在或不是目录: {plugin_dir}")
+            return
+            
+        logger.info(f"从目录加载插件: {plugin_dir}")
+        
+        # 获取绝对路径
+        abs_path = os.path.abspath(plugin_dir)
+        
+        # 将目录添加到 Python 路径
+        if abs_path not in os.sys.path:
+            os.sys.path.insert(0, abs_path)
+            
+        # 遍历目录下的所有 Python 文件
+        for file in os.listdir(abs_path):
+            if file.endswith('.py') and file != '__init__.py':
+                module_name = file[:-3]  # 去除 .py 后缀
+                try:
+                    importlib.import_module(module_name)
+                    logger.info(f"从目录加载插件模块: {module_name}")
+                except ImportError as e:
+                    logger.error(f"加载插件模块失败: {module_name} - {e}")
     
     def _init_components(self) -> None:
         """初始化收集器、分析器和通知器"""

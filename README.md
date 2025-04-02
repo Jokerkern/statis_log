@@ -1,20 +1,35 @@
 # statis_log
 
-一个工程化的日志收集、分析和通知工具，提供灵活的扩展性。
+一个工程化的日志收集、分析和通知工具，提供灵活的扩展性。基于Python 3.12开发，使用简单的插件系统实现高度可定制化。
 
-## 主要功能
+[![Python Version](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-- **日志收集**：从多种来源收集日志，包括文件、数据库等
-- **日志分析**：使用多种分析器分析日志内容，识别模式和问题
-- **通知**：基于分析结果发送各种形式的通知
+## 特点
+
+- **模块化设计**：收集器、分析器和通知器完全解耦，可独立扩展
+- **日志收集**：从多种来源收集日志，包括文件、数据库、API等
+- **日志分析**：使用多种分析器处理日志内容，识别模式和问题
+- **智能通知**：基于分析结果触发条件通知，支持多种通知方式
+- **易于扩展**：简单的插件注册机制，便于添加自定义功能
+- **配置驱动**：通过YAML配置文件灵活配置所有组件
 
 ## 安装
 
+### 使用pip安装
+
 ```bash
-pip install statis_log
+pip install statis-log
 ```
 
-或者从源码安装：
+### 使用Poetry安装（推荐）
+
+```bash
+pip install poetry
+poetry add statis-log
+```
+
+### 从源码安装
 
 ```bash
 git clone https://github.com/jokerkern/statis_log.git
@@ -22,21 +37,21 @@ cd statis_log
 pip install -e .
 ```
 
-## 使用方法
+## 快速开始
 
-### 初始化配置
+### 初始化配置文件
 
 ```bash
 statis-log init -o config.yaml
 ```
 
-### 验证配置
+### 验证配置文件
 
 ```bash
 statis-log validate -c config.yaml
 ```
 
-### 运行
+### 运行日志分析
 
 ```bash
 statis-log run -c config.yaml
@@ -99,7 +114,36 @@ notification_rules:
       value: 0
 ```
 
-## 拓展性设计
+## 主要组件
+
+### 收集器 (Collectors)
+
+负责从不同来源收集日志数据：
+
+- **文件收集器**：从本地或远程文件系统读取日志文件
+- **数据库收集器**：从各种数据库中查询日志记录
+- **API收集器**：通过HTTP API获取日志数据
+- **自定义收集器**：通过插件系统扩展
+
+### 分析器 (Analyzers)
+
+负责分析日志内容，识别模式和问题：
+
+- **模式分析器**：使用正则表达式识别日志中的特定模式
+- **统计分析器**：统计日志中的关键指标
+- **异常分析器**：专注于识别和分类异常情况
+- **自定义分析器**：通过插件系统扩展
+
+### 通知器 (Notifiers)
+
+负责发送各种形式的通知：
+
+- **邮件通知器**：发送电子邮件通知
+- **短信通知器**：发送短信通知
+- **WebHook通知器**：调用WebHook URL
+- **自定义通知器**：通过插件系统扩展
+
+## 扩展性设计
 
 ### 自定义收集器
 
@@ -151,6 +195,25 @@ class MyCustomNotifier(BaseNotifier):
 # 注册通知器
 notifier_registry.register("my_custom", MyCustomNotifier)
 ```
+
+## 贡献指南
+
+1. Fork 项目仓库
+2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
+3. 提交更改 (`git commit -m 'Add some amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 创建Pull Request
+
+## 待办事项
+
+- [ ] 增加更多内置收集器类型
+- [ ] 增强分析器功能，支持机器学习模型
+- [ ] 提供Web界面进行管理
+- [ ] 完善文档和示例
+
+## 版本历史
+
+- **0.1.0** - 初始版本发布
 
 ## 许可证
 

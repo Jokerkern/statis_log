@@ -11,10 +11,12 @@ from email.mime.multipart import MIMEMultipart
 from typing import Any, Dict, List, Optional
 
 from .base import BaseNotifier
+from statis_log.utils.plugin import notifier
 
 logger = logging.getLogger(__name__)
 
 
+@notifier("email")
 class EmailNotifier(BaseNotifier):
     """SMTP邮件通知器"""
     

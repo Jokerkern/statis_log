@@ -9,6 +9,7 @@ import logging
 from typing import Any, Dict, List, Optional, Pattern
 
 from .base import BaseAnalyzer
+from statis_log.utils.plugin import analyzer
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +55,7 @@ class PatternRule:
         }
 
 
+@analyzer("pattern")
 class PatternAnalyzer(BaseAnalyzer):
     """
     模式分析器，根据预定义规则分析日志

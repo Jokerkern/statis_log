@@ -12,10 +12,12 @@ import logging
 from typing import Any, Dict, List, Optional, Pattern
 
 from .base import BaseCollector
+from statis_log.utils.plugin import collector
 
 logger = logging.getLogger(__name__)
 
 
+@collector("file")
 class FileCollector(BaseCollector):
     """文件日志收集器，从文件系统收集日志"""
     
