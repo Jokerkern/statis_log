@@ -4,4 +4,4 @@
 
 from .base import BaseNotifier
 
-__all__ = ['BaseNotifier'] 
+__all__ = ["BaseNotifier"]

@@ -4,10 +4,11 @@ pytest配置文件
 定义测试所需的通用夹具和配置
 """
 
-import os
-import pytest
 import logging
+import os
 import tempfile
+
+import pytest
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -15,10 +16,10 @@ def setup_logging():
     """设置测试的日志记录"""
     # 配置根日志记录器，使其不输出到控制台
     logging.basicConfig(level=logging.INFO, handlers=[])
-    
+
     # 创建一个空的处理器，防止输出到控制台
     null_handler = logging.NullHandler()
-    logging.getLogger('statis_log').addHandler(null_handler)
+    logging.getLogger("statis_log").addHandler(null_handler)
 
 
 @pytest.fixture
@@ -37,7 +38,7 @@ def sample_config():
                 "type": "file",
                 "enabled": True,
                 "path": "/tmp",
-                "pattern": "*.log"
+                "pattern": "*.log",
             }
         },
         "analyzers": {
@@ -45,20 +46,11 @@ def sample_config():
                 "type": "pattern",
                 "enabled": True,
                 "rules": [
-                    {
-                        "name": "error_rule",
-                        "pattern": "ERROR",
-                        "severity": "error"
-                    }
-                ]
+                    {"name": "error_rule", "pattern": "ERROR", "severity": "error"}
+                ],
             }
         },
-        "notifiers": {
-            "console_notifier": {
-                "type": "console",
-                "enabled": True
-            }
-        }
+        "notifiers": {"console_notifier": {"type": "console", "enabled": True}},
     }
 
 
@@ -71,20 +63,20 @@ def sample_logs():
             "file": "/tmp/app.log",
             "line": 1,
             "content": "2023-01-01 12:00:00 INFO: 正常操作",
-            "timestamp": "2023-01-01T12:00:00"
+            "timestamp": "2023-01-01T12:00:00",
         },
         {
             "source": "file_collector",
             "file": "/tmp/app.log",
             "line": 2,
             "content": "2023-01-01 12:01:00 ERROR: 发生了错误",
-            "timestamp": "2023-01-01T12:01:00"
+            "timestamp": "2023-01-01T12:01:00",
         },
         {
             "source": "file_collector",
             "file": "/tmp/app.log",
             "line": 3,
             "content": "2023-01-01 12:02:00 WARNING: 警告信息",
-            "timestamp": "2023-01-01T12:02:00"
-        }
-    ] 
+            "timestamp": "2023-01-01T12:02:00",
+        },
+    ]
