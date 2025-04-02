@@ -1,13 +1,13 @@
 @echo off
-echo 正在启动开发服务器...
+echo Starting development server...
 
-REM 如果有配置文件，可以从特定配置文件启动
+REM If config file is provided, use it
 if not "%~1"=="" if exist "%~1" (
     set CONFIG_FILE=%~1
-    echo 使用配置文件: %CONFIG_FILE%
+    echo Using config file: %CONFIG_FILE%
     poetry run statis-log --config "%CONFIG_FILE%"
 ) else (
-    REM 默认配置
-    echo 使用默认配置
+    REM Use default configuration
+    echo Using default configuration
     poetry run statis-log
 ) 
