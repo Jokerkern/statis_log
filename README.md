@@ -8,7 +8,7 @@
 ## 特点
 
 - **模块化设计**：收集器、分析器和通知器完全解耦，可独立扩展
-- **日志收集**：从多种来源收集日志，包括文件、数据库、API等
+- **日志收集**：从多种来源收集日志，包括文件、数据库、API、Erlang节点等
 - **日志分析**：使用多种分析器处理日志内容，识别模式和问题
 - **智能通知**：基于分析结果触发条件通知，支持多种通知方式
 - **易于扩展**：简单的插件注册机制，便于添加自定义功能
@@ -73,6 +73,15 @@ collectors:
     pattern: "*.log"
     content_filter: "ERROR|WARN"
     max_size: 10
+  
+  erlang_logs:
+    type: erlang
+    node_name: my_erlang_node
+    cookie: my_cookie
+    host: 192.168.1.100
+    timeout: 10
+    max_logs: 200
+    log_path: "/var/log/erlang"
 
 analyzers:
   error_analyzer:
@@ -121,6 +130,7 @@ notification_rules:
 负责从不同来源收集日志数据：
 
 - **文件收集器**：从本地或远程文件系统读取日志文件
+- **Erlang节点收集器**：连接到Erlang节点获取日志数据
 - **数据库收集器**：从各种数据库中查询日志记录
 - **API收集器**：通过HTTP API获取日志数据
 - **自定义收集器**：通过插件系统扩展
@@ -160,6 +170,33 @@ class MyCustomCollector(BaseCollector):
 
 # 注册收集器
 collector_registry.register("my_custom", MyCustomCollector)
+```
+
+### Erlang收集器配置
+
+使用Erlang收集器需要添加额外依赖：
+
+```bash
+# 使用pip
+pip install statis-log[erlang]
+
+# 使用Poetry
+poetry add statis-log -E erlang
+```
+
+Erlang收集器配置示例：
+
+```yaml
+collectors:
+  erlang_logs:
+    type: erlang
+    node_name: my_erlang_node  # Erlang节点名称 (必填)
+    cookie: my_cookie          # Erlang分布式cookie (必填)
+    host: 192.168.1.100        # 主机地址 (可选，默认localhost)
+    port: 4369                 # 端口 (可选)
+    timeout: 10                # 连接超时(秒) (可选，默认5秒)
+    max_logs: 200              # 最大日志条数 (可选，默认100条)
+    log_path: "/var/log/erlang" # 日志路径 (可选)
 ```
 
 ### 自定义分析器
@@ -206,7 +243,7 @@ notifier_registry.register("my_custom", MyCustomNotifier)
 
 ## 待办事项
 
-- [ ] 增加更多内置收集器类型
+- [x] 增加更多内置收集器类型（已添加Erlang收集器）
 - [ ] 增强分析器功能，支持机器学习模型
 - [ ] 提供Web界面进行管理
 - [ ] 完善文档和示例
