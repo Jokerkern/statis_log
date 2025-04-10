@@ -21,6 +21,7 @@ from statis_log.core import (
 )
 from statis_log.utils.config import load_config, save_config
 from statis_log.utils.logger import setup_logging
+from statis_log import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,9 @@ def create_parser() -> argparse.ArgumentParser:
         description="statis_log - 日志收集、分析和通知工具",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
+    
+    # 添加版本参数选项
+    parser.add_argument("-v", "--version", action="store_true", help="显示版本信息")
 
     # 创建子命令解析器
     subparsers = parser.add_subparsers(dest="command", help="命令")
@@ -150,6 +154,11 @@ def handle_init(args: argparse.Namespace) -> int:
             }
         },
         "notifiers": {
+            "cli_notifier": {
+                "type": "cli",
+                "use_color": True,
+                "output_format": "text"
+            },
             "admin_email": {
                 "type": "email",
                 "smtp_server": "smtp.example.com",
@@ -165,7 +174,7 @@ def handle_init(args: argparse.Namespace) -> int:
         "notification_rules": {
             "error_alert": {
                 "analyzer": "error_analyzer",
-                "notifier": "admin_email",
+                "notifier": "cli_notifier",  # 默认使用命令行通知器
                 "title": "检测到日志错误",
                 "message": "共检测到 {matched_logs} 条错误日志，其中包括 {error_count} 个错误和 {warning_count} 个警告。",
                 "condition": {
@@ -330,6 +339,11 @@ def main() -> int:
     """
     parser = create_parser()
     args = parser.parse_args()
+    
+    # 处理版本信息
+    if args.version:
+        print(f"statis_log 版本: {__version__}")
+        return 0
 
     if not args.command:
         parser.print_help()

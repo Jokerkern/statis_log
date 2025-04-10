@@ -2,6 +2,7 @@
 Erlang日志收集器
 
 从多个Erlang节点收集日志，首先通过登录服获取服务器列表，然后从各服务器收集日志文件
+仅限内网 外网有防火墙
 """
 
 import logging
@@ -43,10 +44,8 @@ class ErlangLogCollector(BaseCollector):
         self.login_cookie = self.config.get("login_cookie")
         self.log_dir = self.config.get("log_dir")
         self.log_pattern = self.config.get("log_pattern")
-        self.server_list_module = self.config.get("server_list_module")
-        self.server_list_function = self.config.get("server_list_function", "get_server_list")
         self.server_cookie = self.config.get("server_cookie", self.login_cookie)
-        self.server_prefix = self.config.get("server_prefix", "")
+        self.server_prefix = self.config.get("server_prefix", "game_4399_s")
         self.content_filter = self.config.get("content_filter")
         self.max_size = self.config.get("max_size", 100)  # 默认100MB
         self.encoding = self.config.get("encoding", "utf-8")
@@ -64,9 +63,6 @@ class ErlangLogCollector(BaseCollector):
             return False
         if not self.log_pattern:
             logger.error("缺少必要的配置: log_pattern")
-            return False
-        if not self.server_list_module:
-            logger.error("缺少必要的配置: server_list_module")
             return False
         
         # server_prefix是可选的，但如果提供了，记录相关信息
@@ -113,65 +109,16 @@ class ErlangLogCollector(BaseCollector):
             logger.info(f"正在从登录服 {self.login_node} 获取服务器列表")
             result = call(
                 node=self.login_node,
-                module=self.server_list_module,
-                function=self.server_list_function,
+                module="ets",
+                function="tab2list",
+                args=f"[serv_info]",
                 cookie=self.login_cookie
             )
-            
+            logger.info(result)
             # 解析返回的服务器列表
-            # 结果可能是类似 ['server1@host', 'server2@host', ...] 或 [{"id": 1, "ip": "192.168.1.1"}, ...]
             servers = []
             try:
-                # 去除返回值中的方括号和引号，然后按逗号分割
-                cleaned_result = result.strip("[]' ").replace("'", "").replace("\"", "")
-                if cleaned_result:
-                    raw_servers = [s.strip() for s in cleaned_result.split(",")]
-                    
-                    # 如果指定了服务器前缀，则使用前缀+服号+@+IP构建节点名
-                    if self.server_prefix:
-                        for srv in raw_servers:
-                            # 尝试解析服务器ID和IP
-                            if "{" in srv and "}" in srv:
-                                # 解析JSON/字典格式的服务器信息
-                                try:
-                                    # 格式可能类似 {id:1,ip:192.168.1.1} 或 {id:1,host:192.168.1.1}
-                                    parts = srv.strip("{}").split(",")
-                                    server_data = {}
-                                    for part in parts:
-                                        key, value = part.split(":", 1)
-                                        server_data[key.strip()] = value.strip()
-                                    
-                                    server_id = server_data.get("id")
-                                    server_ip = server_data.get("ip") or server_data.get("host")
-                                    
-                                    if server_id and server_ip:
-                                        node_name = f"{self.server_prefix}{server_id}@{server_ip}"
-                                        servers.append(node_name)
-                                except Exception as e:
-                                    logger.error(f"解析服务器信息失败: {e}, 原始数据: {srv}")
-                            else:
-                                # 尝试从现有格式中提取信息
-                                if "@" in srv:
-                                    srv_parts = srv.split("@")
-                                    if len(srv_parts) == 2:
-                                        srv_name, srv_ip = srv_parts
-                                        # 尝试从服务器名中提取ID
-                                        import re
-                                        id_match = re.search(r'\d+', srv_name)
-                                        if id_match:
-                                            server_id = id_match.group()
-                                            node_name = f"{self.server_prefix}{server_id}@{srv_ip}"
-                                            servers.append(node_name)
-                                        else:
-                                            # 如果无法提取ID，则保留原始格式
-                                            servers.append(srv)
-                                    else:
-                                        servers.append(srv)
-                                else:
-                                    servers.append(srv)
-                    else:
-                        # 如果没有指定前缀，直接使用原始节点名
-                        servers = raw_servers
+                servers = [f"{self.server_prefix}{server['id']}@192.168.1.1" for server in result]
             except Exception as e:
                 logger.error(f"解析服务器列表失败: {e}")
                 

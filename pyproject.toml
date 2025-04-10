@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "statis-log"
-version = "0.1.0"
+version = "0.1.1"
 description = "一个工程化的日志收集、分析和通知工具"
 authors = ["Jokerkern <852946650@qq.com>"]
 readme = "README.md"

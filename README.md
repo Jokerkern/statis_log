@@ -121,6 +121,17 @@ notification_rules:
       field: summary.matched_logs
       operator: ">"
       value: 0
+
+  cli_notifier:
+    type: cli
+    use_color: true
+    output_format: text
+    output_file: logs.txt
+    severity_colors:
+      info: green
+      warning: yellow
+      error: red
+      critical: red
 ```
 
 ## 主要组件
@@ -148,10 +159,35 @@ notification_rules:
 
 负责发送各种形式的通知：
 
+- **命令行通知器**：直接在终端显示通知信息
 - **邮件通知器**：发送电子邮件通知
-- **短信通知器**：发送短信通知
 - **WebHook通知器**：调用WebHook URL
+- **IM WebHook通知器**：发送消息到即时通讯平台
 - **自定义通知器**：通过插件系统扩展
+
+### 命令行通知器配置
+
+命令行通知器是默认的通知方式，直接在命令行终端中展示通知信息：
+
+```yaml
+notifiers:
+  cli_notifier:
+    type: cli
+    use_color: true
+    output_format: text
+    output_file: logs.txt
+    severity_colors:
+      info: green
+      warning: yellow
+      error: red
+      critical: red
+```
+
+命令行通知器特点：
+- 支持彩色输出，根据严重程度自动使用不同颜色
+- 支持多种输出格式：纯文本、JSON、YAML
+- 可选择输出到文件或控制台
+- 适合本地开发和测试环境使用
 
 ## 扩展性设计
 
